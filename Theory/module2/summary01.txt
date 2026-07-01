@@ -1,0 +1,82 @@
+Information Security
+
+lesson focus on INTEGRITY, CONFIDENTIALITY, PRIVACY and FAIRNESS
+
+INTEGRITY also means NO DATA POISONING and MODEL INTEGRITY in the context of ML
+
+PRIVACY also means DATA MINIMIZATION and PROPER ENCRYPTION as well as MEMBERSHIP INFERENCE PROTECTION in ML
+
+in modern systems TRUST can't be assumed
+
+Trustworthiness and Privacy are not independent -> Improving one objective may weaken the other
+
+Does the AI revolution change the overall picture? YES!!!
+
+aggregating data now means more knowledge but also more exposure (inference, re-identification)
+
+###########################################################################
+USE CASE #1 CROWDSENSING APPLICATION (traffic analysis, route optimization)
+###########################################################################
+
+-central entity mantains all data (no user sovereignty, power to the controller)
+-keep data locally, distribute upon request (mantain sovereignty but not practical one needs to be available)
+-ledger (data integrity and traceability but only good for small amount of data, slow and no rectification)
+-decentralized file systems (data integrity, access control and persistence can be problematic)
+integrity -> use hashes, access control -> use encryption, data persistence -> incentives
+
+Data is distributed, but risks are centralized through aggregation
+Integrity, privacy, and availability must be designed together
+Architecture choices directly impact trust assumptions
+
+###########################################################################
+Use Case #2: Security Analysis of a Clinical ML System
+###########################################################################
+
+A diagnostic model is trained on data collected from multiple hospitals (cloud-orchestrated federated learning system) and accessed through a web API by clinicians.
+
+each node trains and then provides its parameters, all the parameters are then aggregated into a single central one (the idea is that patient records remain local to each hospital)
+
+During training, labels are produced by external annotation contractors
+
+THREATS
+
+integrity -> bad labels from contractors, adversarial gradients sent to aggregator via updates
+
+privacy -> understand whether a specific patient record was used in training, whether sensitive attributes can be reconstructed. solution -> DIFFERENTIAL PRIVACY
+
+availability -> computational load -> API limits
+
+KEY TAKEAWAY -> ML systems introduce new attack surfaces (training + inference), security is data-dependent, not only system-dependent
+
+###########################################################################
+Use Case #4: Security Analysis of an Autonomous Perception System
+###########################################################################
+
+A perception model for an autonomous vehicle is deployed on an embedded ECU system must remain reliable under hard conditions
+
+No continuous online retraining
+Centralized training performed in the vendor data center
+
+THREATS:
+Integrity: Adversarial Patches -> train for robustness
+	Annotation Supply-Chain Poisoning
+	
+Availability: Adversarial Sensor Inputs -> Input validation and preprocessing constraints, resource 	
+	isolation at process level
+	
+Authenticity: Model Tampering on ECU (Unauthorized firmware modification, Backdoor) -> SHA-256 integrity check (SECURE BOOT)
+
+###########################################################################
+Use Case #5: Overlay Networks of Interacting AI Agents
+###########################################################################
+
+a fully decentralized system composed of N AI agents
+
+Local compromise means Global instability
+
+THREATS:
+-Compromised High-Centrality Agent -> Rapid misinformation propagation
+-Coordinated Minority Attack -> Biased consensus and polarization
+-Topology-Driven Perturbation Amplification
+
+general mitigations -> Trust-Weighted Aggregation, Topology Engineering, Byzantine-Resilient Consensus, Influence Monitoring

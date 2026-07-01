@@ -1,0 +1,54 @@
+## Tutorial Summary: DES and AES Encryption using OpenSSL
+
+This tutorial explores the practical application of symmetric encryption ciphers using OpenSSL, evaluates modern CPU performance under different cryptographic algorithms, and validates standard textbook assumptions regarding brute-force attack speeds.
+
+* **DES Encryption & Decryption:** The text demonstrates how to encrypt text into a binary file using the Data Encryption Standard (DES). Because modern versions of OpenSSL disable this obsolete and insecure cipher by default, the tutorial explains how to manually enable a "Legacy Provider Configuration" via an external configuration file (`openssl.cnf`) for educational or forensic purposes. Decryption is verified using the Linux `diff` utility to ensure the output matches the original text.
+
+
+* **Performance Benchmarking:** Using the built-in `openssl speed` command, the tutorial measures pure CPU and RAM computing power by tracking how many bytes an algorithm can encrypt in a given timeframe. It highlights that key-space exploration is entirely parallelizable; using the `-multi` flag distributes workload slices across independent CPU cores without requiring inter-core communication.
+
+
+* **DES vs. AES:** Software implementations of DES are noted to be slow and sluggish. In contrast, Advanced Encryption Standard (AES) performance is drastically superior because modern processors feature dedicated, independent hardware-level AES implementation units on each core.
+
+
+
+---
+
+## Answers to the Tutorial Questions
+
+### 1. What is the key derivation?
+
+A Key Derivation Function (KDF) serves as a mathematical bridge between a human-readable password (such as "cybersecurity") and the fixed-length binary key required by a cryptographic cipher (such as the 56 raw bits needed for DES).
+
+* **The Warning Sign:** The "Weak Key Derivation" warning provided by OpenSSL serves as an Operational Security (OpSec) red flag. It indicates that older versions of OpenSSL rely on a single iteration of a hash function to turn a password into a key, which heavily compromises security—especially if simple dictionary words are chosen.
+
+
+
+### 2. What is wrong with the encryption operation performed? (OpSec Failures)
+
+While utilizing an insecure cipher like DES is an obvious flaw, the execution command (`openssl enc -e -des -salt ...`) suffers from deeper operational security failures:
+
+* **The ECB Problem (Default Mode of Operation):** Omitting a specific block cipher mode causes OpenSSL to default to Electronic Codebook (ECB) mode. ECB is entirely deterministic, meaning it encrypts identical plaintext blocks independently into identical ciphertext blocks. This creates "pattern leakage," allowing an attacker to visually deduce the structure or content of the file without actually decrypting it.
+
+
+* **Password Exposure in Command History:** Typing `-pass pass:cybersecurity` directly into the terminal exposes the secret key in plain text. On Linux systems, this password is permanently saved to the plain-text command history file (accessible via the `history` command) and remains fully visible to any local user or script in the system process list (`ps -aux`) while the command runs. *Mitigation:* Passwords should instead be fed to the terminal via standard input or loaded from a secure file.
+
+
+
+### 3. Is the textbook assumption of $10^6$ decryptions/$\mu$s realistic for brute-forcing?
+
+The realism of this assumption depends entirely on the type of hardware an attacker uses:
+
+* **For a standard single CPU:** **No**, it is not realistic. As shown in the tutorial's benchmark calculations, a standard modern CPU core is multiple orders of magnitude slower than this textbook baseline.
+
+
+* **For a professional attacker:** **Yes**, it is highly realistic. Professional attackers do not rely on general-purpose CPUs. Instead, they utilize Graphics Processing Units (GPUs) capable of processing thousands of operations in parallel, or Application-Specific Integrated Circuits (ASICs)—custom chips manufactured solely to decrypt DES. This specialized hardware can easily meet and exceed the threshold of one million decryptions per microsecond.
+
+
+
+### 4. What are the trust implications of hardware vs. software implementations?
+
+* **The Hardware Trust Dilemma:** Modern CPUs embed hardware-level implementations of AES, which drastically increases execution speeds. However, you must trust this implementation blindly because it is impossible to directly audit or check the physical silicon logic; you can only provide an input/key and observe the output.
+
+
+* **Software Verification:** In contrast, open-source software implementations can be directly inspected and verified line-by-line. To audit a hardware cipher, your only option is to cross-examine its output against a trusted software implementation to see if they yield identical results. If you do not trust the hardware implementation, OpenSSL permits forcing a software fallback, though doing so results in a severe performance penalty.

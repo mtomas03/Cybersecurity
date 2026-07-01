@@ -1,0 +1,94 @@
+## Summary of the GPG Tutorial
+
+This tutorial provides a practical introduction to public-key cryptography and the concept of decentralized security via GnuPG (GPG), an implementation of the OpenPGP standard used to secure inherently insecure email protocols.
+
+The core concepts covered in the document include:
+
+* **Trust Models:** It contrasts the **Hierarchical Model** used by web browsers (which relies on a central Certificate Authority to automatically establish trust "from the top down") with the **Decentralized Model / Web-of-Trust** used by GPG (where trust is built "from the ground up" via direct, peer-to-peer verification and key signing).
+
+
+* **Asymmetric Cryptography:** GPG uses mathematical principles like the factorization of large prime numbers ($p$ and $q$) to generate a public/private key pair. The public key is shared openly, while the private key remains confidential and is secured locally.
+
+
+* **Key Lifecycle & Distribution:** The tutorial outlines how to generate keys, the importance of setting expiration dates, creating revocation certificates, and the risks of using automated public key servers (which do not verify real-world identities, making them vulnerable to impersonation and Man-in-the-Middle attacks).
+
+
+* **GPG Operations:** It details command-line procedures for listing keys, exporting keys into ASCII armor text format (`-a`), encrypting messages for confidentiality, signing messages for authenticity/integrity, and combining both operations.
+
+
+* **Symmetric Encryption & Alternatives:** GPG can also perform symmetric encryption using a shared secret key. However, due to GPG's limited usability and large attack surface, the tutorial highlights **`age`** as a modern, cross-platform, and more secure Go-based alternative.
+
+
+
+---
+
+## Answers to the Tutorial Questions
+
+### 1. Why does GPG ask the user to enter a passphrase? What is it used for?
+
+* **Purpose:** The passphrase is used to protect your **private key**.
+
+
+* **How it works:** While your public key is meant to be safely distributed, your private key is stored locally in your home directory. If an unauthorized person gains access to your computer, they could easily steal a plain-text private key. GPG mitigates this by using **symmetric encryption** to lock the private key file, using your passphrase as the unlock key.
+
+
+* **Trade-off:** This provides high confidentiality but reduces usability, as you must input the passphrase every time you perform an operation requiring the private key (such as decrypting a file or signing a message).
+
+
+
+### 2. Why is a revocation certificate fundamental?
+
+A revocation certificate is critical for managing emergency scenarios where you lose control of your digital identity. It is fundamental for three main reasons:
+
+* **Private Key Compromise:** If an attacker steals your private key, you can publish the revocation certificate to key servers to alert others that the key is no longer secure and should not be trusted.
+
+
+* **Loss of Passphrase/Key:** If you forget your passphrase or lose your key, the public key would stay on key servers forever without a way to delete it. A revocation certificate allows you to cleanly "retire" it so it does not cause confusion.
+
+
+* **Security Guardrail:** If an attacker gets a hold of your revocation certificate, they *cannot* impersonate you (since that requires the private key and passphrase), but they can execute a denial-of-service by revoking your active identity. It must be generated in advance and stored securely separate from your primary computer.
+
+
+
+### 3. What do we mean by publishing a public key in a "secure way"? What are the relevant security properties?
+
+Publishing a key in a "secure way" means neutralizing the threat of a **Man-in-the-Middle (MitM) attack**, where an adversary replaces your legitimate public key with their own to intercept and decrypt your messages. Two key security properties must be maintained:
+
+* **Integrity:** Ensuring that the public key file cannot be altered, tampered with, or completely swapped by a malicious actor while sitting on a server or during transit.
+
+
+* **Authenticity (Identity Binding):** Providing a reliable mechanism for your contacts to verify that the public key mathematically and genuinely belongs to your real-world identity, preventing fraudsters from creating a fake key under your name.
+
+
+
+### 4. Why must a webpage hosting a public key support HTTPS? What is wrong with HTTP?
+
+* **The Problem with HTTP:** HTTP transmits data in clear text without verification. Anyone controlling a network hop or hacking the site's administration can silently replace your public key file with an imposter's key.
+
+
+* **The Benefit of HTTPS:** HTTPS utilizes the traditional PKI model (browser certificates) to guarantee both **integrity** and **authenticity**. It ensures that users downloading your key are genuinely connecting to your designated server and receiving the exact, untampered file you originally uploaded.
+
+
+
+### 5. How is access restricted to the home directory? Is it secure? Is it encrypted by default? How can you effectively manage private key confidentiality?
+
+* **Access Restriction:** By default, GPG relies on your **Operating System's File System Permissions**. It creates its storage directory with strict restrictions so that only your specific user account and the system administrator (root) can read or write to it.
+
+
+* **Is it secure?** It is secure against standard, non-privileged local users. However, it is **not secure** against a user with root/administrative privileges, malware running with your user account permissions, or anyone who physically steals an unencrypted storage drive.
+
+
+* **Is it encrypted by default?** No. Standard operating systems do not automatically encrypt the home directory unless explicitly configured. However, GPG compensates for this vulnerability by natively encrypting the private key file itself using your passphrase.
+
+
+* **Effective Confidentiality Management:** To maximize security, you should implement layers beyond GPG's default features:
+* Enable **Full Disk Encryption** or home-directory encryption to protect data at rest against physical theft.
+
+
+* Choose a **strong, complex passphrase** that is resilient against local brute-force attacks.
+
+
+* Consider moving your private key entirely out of the home directory onto a **dedicated cryptographic hardware device** (like a smartcard or security token).
+
+
+* Regularly check your directory permissions to ensure they haven't been accidentally altered.

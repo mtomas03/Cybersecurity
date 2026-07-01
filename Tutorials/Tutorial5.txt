@@ -1,0 +1,36 @@
+## Executive Summary of the Document
+
+This document provides an educational overview of **pharming attacks**, which are cyberattacks designed to maliciously redirect a user's web traffic from a legitimate website to a fake clone. It outlines the structural differences and methodologies required to execute these attacks on unencrypted HTTP connections versus encrypted HTTPS connections, concluding with how the security industry handles compromised Certificate Authorities (CAs).
+
+---
+
+## Comprehensive Summary
+
+### 1. Attacking HTTP
+
+Because HTTP traffic is completely unencrypted, routing packets can be intercepted and redirected relatively easily. The basic architecture of an HTTP pharming attack consists of three steps: cloning the target website, hosting it on a fake server, and redirecting the victim's requests.
+
+* **Network-Wide Redirection:** Attackers can compromise an entire local network by modifying DNS host addresses or the default gateway via DHCP manipulation. This is often achieved by deploying a rogue DHCP server paired with a Denial-of-Service (DoS) attack on the legitimate DHCP server.
+
+
+* **Single Host Redirection:** If targeting an individual device, attackers can modify the local `/etc/hosts` file to bypass external DNS entirely. Alternatively, they can use silent "transparent proxies" to intercept traffic at the network level or implement kernel-level packet manipulation using Linux tools like `iptables` or `nftables`.
+
+
+
+### 2. Attacking HTTPS
+
+HTTPS incorporates Transport Layer Security (TLS) to guarantee confidentiality, integrity, and authenticity, which prevents standard redirection because the victim's browser will instantly flag a fake site for lacking a valid digital certificate.
+
+* To bypass this, an attacker must compromise the system's trust local to the device.
+
+
+* This is surprisingly simple: without needing root/administrator privileges or modifying the browser's binary code, an attacker can alter browser settings to add a fake Certificate Authority (CA) to the trusted list.
+
+
+* Once completed, any fake certificates signed by the attacker's fake CA will be accepted by the compromised browser without warning padlocks or security errors.
+
+
+
+### 3. Certificate Revocation
+
+When a legitimate Certificate Authority's private key is compromised, waiting for certificates to expire naturally is not an option. They must be invalidated immediately through revocation checking mechanisms implemented in web browsers.

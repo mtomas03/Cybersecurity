@@ -1,0 +1,75 @@
+[[TUTORIAL 1: Exposed attack surface]]
+
+-probing on a network is done, illegal in some countries.
+-uses NMAP to discovers hosts on a network that we have already infiltrated
+-we do it with ICMP but can also use TCP and UDP, the latter are a noisier because they interact with ports
+-discovery can be also done passively by using "netdiscover", exploiting broadcast protocols (DHCP)
+-can also get information about operating system of host
+-once a host has been identified port scanning can be perform to understand which services are exposed
+-this can be done with TCP or UDP, udp slower because it requires timeouts. typically we scan 1000 most popular ports instead of 65536
+-once a service has been identified we can use nmap with additional modules/scripts to scan for vulnerabilities (nikto for web servers)
+-once you gain an entry point you should be looking to make lateral movement or privilege escalations. such weaknesses can be highlighted with LYNIS, also used for hardening.
+
+[[TUTORIAL 2: DES and AES encryption using OpenSSL]]
+
+-shows usage of DES with password that requires derivation -> DES requires 56bit key
+-password is passed via command, there are better ways
+-want to check if consumer hardware can really do 10^6 decryptions / microseconds
+-openSSL has integrated benchmarks to test algorithms
+-benchmark instances can be run in parallel
+-turns out that AES is much better than DES, hardware acceleration helps a lot (default these days)
+
+[[TUTORIAL 3: Practical dictionary attack to the symmetric encryption]]
+
+-use AES(symmetric key) from OPENSSL to encrypt a message
+-use a raw password that needs to be derived into key (the more hashing iteration the better, asymmetric game)
+-for an attacker it's important to have no false negatives (correct key slips away) and the least false positives
+-script 1 stops at the first iteration (false positive)
+-script 2 keeps trying but has no way to detect correct guesses
+-script 3 uses heuristics (3 alphabet characters grouped together), no non printable characters, EOF, italian dictionary.
+-script 4 parallelizes the process (embarrassingly parallel problem). AES is quick with hardware acceleration
+
+[[TUTORIAL 4: Usage examples of GPG]]
+
+-practical usage of the public-key encryption and web-of-trust
+-GPG is a complete implementation of the OpenPGP standard for sending and receiving secure emails
+-implements both symmetric and asymmetric encryption. can also be used for encrypting generic input files
+-shows key-pair generation (some implementation need entropy for randomness to create them)
+-also asks for passphrase to encrypt such keys by means of symmetric encryption since they are viewable on the disk (worse usability)
+-public key should be shared in a secure way, it's also a binary file, can be converted to text.
+-key server is an infrastructure that is specifically dedicated to the publication of public keys and their management
+-key server can also be used to query keys based on id such as an email. there is no certainty that a public key corresponds to a given guy
+-generation of revoke certificate. used to disinherit a public/private key in a key server. in the wrong hands it could cause DOS.
+-once a public key is imported in the keyring you can encrypt documents to be sent, can also encrypt binary data. if not necessary to hide content you can just use digital signature (uses own private key, recipient needs your public key).
+
+-web of trust is an alternative to public key certificates which use CAs
+-the idea is that each user can sign the public key of people they trust with own private key, the signatures one has can be used to measure one's trustability. in the end this will enlarge the web-of-trust
+-carrying the public key is inconvenient. fingerprints can be used (hash value)
+
+-openGPG is a big tool and to reduce the attack surface GUI based versions are also available
+
+[[TUTORIAL 5: Pharming attack]]
+
+-Pharming is an attack intended to redirect a website's traffic to a fake site by installing a malicious program on the victim's computer. Conducted either by changing the hosts file on a victim's computer or by exploitation of a vulnerability in DNS server software.
+-possible both in the case of HTTP and HTTPS
+-the first step is cloning the target website (wget)
+-second step is about hosting the clone (nginx)
+-third step is redirecting requests to the clone (abusing etc/hosts or poisoning a DNS)
+-if you want multiple targets you can change the way a DNS resolves IPs. for a single target modifying host files is enough (legitimately used to quicken host resolution). other solutions exist but they require modifying iptables which means superuser.
+-in case of https you have to compromise the certificate (corrupt the CA to release certificates that look legit, somehow insert a rogue CA in the browser trusted CAs)
+-certificate expiry is something that developers need to consider.
+
+[[TUTORIAL 6: Offline password cracking using John the Ripper]]
+
+-jtr is a password cracking tool
+-in unix systems the info about user and passwords is split between etc/passwd (readable by all unprivileged users in the system as well as by every
+process running on the system) and etc/shadow (contains the salted and
+hashed passwords). jtr requires a single input to perform its operations.
+-single crack mode ->  tries to guess the passwords using only the information that is available in
+the input file (eg passwords strongly related to username with small variations)
+-wordlist mode -> accepts a dictionary, provided by jtr itself. would be nice to use a localized one.
+-incremental mode -> exhaustive search. brute force attack that can be simplified with assumptions (password length). we cannot expect to finish the brute-force exploration in an acceptable amount of time.
+
+-JtR can be also used to verify the quality of passwords used to protect pdf documents.
+-The content of a “protected” pdf document is encrypted using a symmetric block cipher but the password is also included (in hashed-form) inside the pdf file. this enables the usage of password cracker.
+-why is the hash included? without it, the pdf reader does not know whether decryption is correct. it would have to run it everytime and check the output as well.

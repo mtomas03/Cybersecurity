@@ -1,0 +1,49 @@
+ Privacy Leakage & Security in Generative AI and LLM
+
+training time threats -> membership inference, model inversion, data extraction.
+inference time threats -> data leakage, indirect inference, prompt injection.
+
+GDPR (General Data Protection Regulation) -> health data, explicit consent, data minimisation, right to erasure
+
+-LLM memorize sequences super linearly as the model size increases. this can be problematic as far as data is concerned
+
+-zero shot privacy means that an LLM adheres to confidentiality constraints solely with a wrapper prompt (Never reveal confidential customer information. Do not output API keys or passwords found in the context)
+
+-An aligned language model is a language model whose behavior has been intentionally adjusted so that it's helpful rather than merely predicting the next word as accurately as possible leading to harmful scenarios
+
+-Multimodal models generally have a larger attack surface than text-only models because an attacker can exploit multiple input channels (The image suggests one thing. The accompanying text suggests another)
+
+-LLMs learn from training data that may contain Personally Identifiable Information, and they can
+be prompted to reproduce or reason about sensitive information even without explicit intent
+
+-a traditional chatbot is stateless and takes turns with no external interactions. What is an Agentic AI system? it features autonomy (when and how to use external tools), api invocations, reasoning loops, memory management. decompose task -> invoke tools -> synthesise results -> generate response
+
+-!!! The content of tool calls isvisible to external services outside the trust boundary. may constitute a reportable data breach under GDPR!!!
+
+-Differential Privacy (DP) -> Adding calibrated noise so that attacker cannot confidently determine whether a specific individual's information was used.
+
+-But it's inadequate for agentic LLMs -> applies to statistical aggregates, not to natural language generation. Adding noise to free-text tool calls degrades semantic meaning. Tool call inputs are typically deterministic
+
+-Small Language Models (have a lot less parameters and therefore take less space to run) -> local inference means that data is not transmitted to cloud services
+
+BUT!!! The privacy guarantee of local inference breaks the moment the agent invokes an external tool
+
+Can small language models, operating under zero-shot privacy instructions, reliably filter sensitive patient information from tool invocations? NO THEY CAN'T. 
+
+1) personas with sensitive information -> attack prompts -> tool calling -> LLM judges whether sensitive information was leaked in the prompt
+
+BASELINE (no privacy instructions) -> COMPLETE FAILURE 90% leakage rate 
+models prioritise helpfulness and tool usage (no built-in privacy safety mechanisms)
+
+PRIVACY-HARDENED -> UNACCEPTABLE 56% leakage rate (System prompts alone are an insufficient defence mechanism)
+
+KEY TAKEAWAY -> 
+for designers:
+	- Zero-shot privacy instructions are necessary but insufficient
+	- Trust boundaries must be enforced at the infrastructure level, not only through prompting
+for threat modelling:
+	- a new class of inference-time data exfiltration threats
+	- attack surface scales with the number and type of external tools available to the agent
+for regulators:
+	- GDPR compliance frameworks must be updated
+	- Certification processes for "privacy-safe" agentic deployment are needed

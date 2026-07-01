@@ -1,0 +1,50 @@
+Adversarial Examples
+
+input to a machine learning model that has been intentionally modified in a subtle way so that the model makes a wrong prediction, even though the input still looks normal to a human
+
+-Deliberately modified from legitimate inputs
+-Imperceptible to human perception
+-Transferable across different models
+-Efficient to compute
+
+Adversarial examples make ML-enabled systems unavailable or unreliable in critical applications
+
+example: Add bytes to Android APK to evade detection -> Malicious app classified as benign
+
+-speech recognition, street signal recognition, facial recognition
+
+Security Implication -> Attackers with model access can deliberately break system safety guarantees
+
+The core problem is that neural networks are not robust to all small input perturbations
+
+TYPES OF ATTACK:
+
+White-Box: Full access to model architecture, model parameters, training data
+Black-Box Attacks: limited/no access to information about aforementioned factors
+Grey-Box Attacks: know something about one but not the other (parameters and data)
+
+force prediction to any wrong class is EASY
+Force prediction to specific target class is HARD
+
+Adversary can: Query the model repeatedly, train surrogate models and observe predictions and probabilities
+
+Fast Gradient Sign Method (efficient attack assuming it's a white box one) -> the gradient points in the direction that maximizes the loss. we exploit exactly that. make the model more confident in the wrong prediction.
+
+results:
+- Adversarial examples crafted on one model often fool other models (black box attacks more viable)
+- Random perturbations are ineffective (not a stability issue)
+
+Why do adversarial examples exist?
+-Insufficient Training Data
+-Models learn both robust and non-robust features (hidden patterns)
+
+Projected Gradient Descent (PGD) Attack -> is a multiple step variant of FGSM. it finds the best optima instead of stopping at local ones
+
+Why does transferability occur?
+- Models with aligned gradients show higher transferability
+- Low-complexity models -> High transferability
+- Adversarial perturbations are structured, not random
+
+WHAT CAN BE DONE? Train the model to handle those adversarial examples with the correct label.
+
+might not be enough -> Randomized smoothing -> A defense method that transforms a base classifier into a new "smoothed" classifier by taking the majority vote of the base model's predictions over many noisy versions of an input.

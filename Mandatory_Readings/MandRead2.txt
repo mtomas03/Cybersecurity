@@ -1,0 +1,32 @@
+### Task 1: Precise Summary of the Article
+
+In Reflections on Trusting Trust, Thompson demonstrates that the concept of trust is far more complex than it appears, proving that source code scrutiny alone cannot guarantee system security. The paper establishes this paradigm shift through three progressive stages:
+
+* **Stage I: Self-Reproducing Programs.** Thompson demonstrates how to write a program (a quine) that outputs an exact copy of its own source code. This exercise proves two things: a program can be easily written by another program, and it can carry an arbitrary amount of hidden "excess baggage" that automatically replicates alongside the main algorithm.
+
+* **Stage II: Compiler Learning and Bootstrapping.** The author explains how a compiler written in its own language can be “trained” to recognize new features (such as the escape sequence for the vertical tab `\v`) using raw ASCII values. Once the binary has learned this behaviour, it can recompile future versions of itself to perpetuate that knowledge indefinitely, even if the original instruction is completely removed from the new source code.
+
+* **Stage III: The Double Trojan Horse.** Thompson leverages this self-perpetuating mechanism to plant an invisible supply chain attack. The first Trojan horse detects when a targeted system program (like the UNIX `login` command) is being compiled and alters the binary to accept a secret master password. The second Trojan horse detects when the compiler itself is being recompiled, automatically re-injecting both malicious codes into the new compiler binary.
+
+
+Once this infected binary is established as official, the attacker can completely delete the malicious code from the compiler’s source files. The source code remains 100% clean under human inspection, yet the compiled binaries will permanently carry the backdoor. So, you cannot trust code you did not totally create yourself. No amount of source-level verification will protect you from a compromised toolchain; the lower an attack resides in the system hierarchy (compiler, assembler, loader, or hardware microcode), the harder it becomes to detect.
+
+---
+
+### Task 2: Critical Comment and Relevant Discussion
+
+#### Supply Chain Vulnerabilities and the Human Chain of Trust
+
+Thompson shifts the cybersecurity focus from pure algorithmic verification to a human chain of trust. Because building an entire computing ecosystem from scratch is impossible, we are fundamentally forced to trust external entities and the history of their tools.
+
+A prominent real-world manifestation of this "partial trust" vulnerability is the XcodeGhost incident. Due to slow official download speeds caused by the Great Firewall, Chinese developers downloaded altered versions of Apple’s Xcode from domestic mirrors. Because they implicitly trusted their development tool, they compiled iOS applications embedded with malware. These apps bypassed Apple's automated App Store checks because they were built with a near-official tool, compromising hundreds of millions of endpoints and validating Thompson's warning that compromising the toolchain compromises everything it produces.
+
+#### Contemporary Solutions and Mitigations
+
+While Thompson's paper highlights a profound historical dependency, its goal is not defeatism, but rather to serve as a bootstrap for thinking outside the box through practical mitigations:
+
+* **Multiple Compilers (Diverse Double-Compiling):** Relying on a single compiler binds an organization to its entire unverified history. Using multiple independent compilers to translate the same source code creates distinct chains of trust; comparing the outputs allows developers to isolate and investigate unauthorized toolchain manipulations.
+
+* **Reproducible Builds:** Traditional compilation can be non-deterministic. Enforcing a deterministic framework ensures that rebuilding a program from identical source code yields a bit-for-bit identical binary fingerprint, providing a verifiable baseline to detect unauthorized build-stage injections.
+
+* **Behavioural Monitoring:** Since absolute supply chain trust is an illusion, runtime monitoring acts as an essential safety net. A backdoor must eventually execute an action (such as data exfiltration over the network) allowing network defences to intercept and mitigate the attack even if the compiler successfully hide the vulnerability during development.
